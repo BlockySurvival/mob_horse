@@ -10,6 +10,7 @@ if minetest.registered_nodes["default:permafrost"] then
 	y_off = 10
 end
 
+dofile(MP .. "/config.lua") -- Oversword
 
 -- rideable horse
 
@@ -151,16 +152,21 @@ self.saddle = true
 	end
 })
 
+if global_mob_horse.spawn_enabled_horse then
 mobs:spawn({
 	name = "mob_horse:horse",
-	nodes = {"default:dirt_with_grass", "ethereal:dry_dirt"},
-	min_light = 14,
-	interval = 60,
-	chance = 16000,
-	min_height = 10,
-	max_height = 31000,
+	nodes = global_mob_horse.spawn_on_horse,
+	neighbors = global_mob_horse.spawn_near_horse,
+	min_light = global_mob_horse.spawn_min_light_horse,
+	max_light = global_mob_horse.spawn_max_light_horse,
+	interval = global_mob_horse.spawn_interval_horse,
+	chance = global_mob_horse.spawn_chance_horse,
+	active_object_count = global_mob_horse.spawn_active_object_count_horse,
+	min_height = global_mob_horse.spawn_min_height_horse,
+	max_height = global_mob_horse.spawn_max_height_horse,
 	day_toggle = true,
 })
+end
 
 mobs:register_egg("mob_horse:horse", S("Horse"), "wool_brown.png", 1)
 
