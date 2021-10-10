@@ -1,3 +1,4 @@
 mobs
+config
 lucky_block?
 intllib?

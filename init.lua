@@ -18,6 +18,23 @@ local shoes = {
 	["mobs:horseshoe_diamond"] = {10, 6, 6, "mobs_horseshoe_diamondo.png"}
 }
 
+local mod_config = config.settings_model('mob_horse', {
+	horse = {
+		spawn = {
+			enabled = config.types.boolean(true),
+			on = config.types.list({"default:dirt_with_grass", "ethereal:dry_dirt"}),
+			near = config.types.list({ "air" }),
+			interval = config.types.int(60, { min=1 }),
+			chance = config.types.int(16000, { min=1 }),
+			min_light = config.types.int(14, { min=0 }),
+			max_light = config.types.int(15, { min=0 }),
+			min_height = config.types.int(10, { min=-31000, max=31000 }),
+			max_height = config.types.int(31000, { min=-31000, max=31000 }),
+			active_object_count = config.types.int(1, { min=1 }),
+		}
+	}
+})
+
 -- rideable horse
 mobs:register_mob("mob_horse:horse", {
 	type = "animal",
@@ -213,16 +230,21 @@ mobs:register_mob("mob_horse:horse", {
 	end,
 })
 
-mobs:spawn({
-	name = "mob_horse:horse",
-	nodes = {"default:dirt_with_grass", "ethereal:dry_dirt"},
-	min_light = 14,
-	interval = 60,
-	chance = 16000,
-	min_height = 10,
-	max_height = 31000,
-	day_toggle = true,
-})
+if mod_config.horse.spawn.enabled then
+	mobs:spawn_specific(
+		"mob_horse:horse",
+		mod_config.horse.spawn.on,
+		mod_config.horse.spawn.near,
+		mod_config.horse.spawn.min_light,
+		mod_config.horse.spawn.max_light,
+		mod_config.horse.spawn.interval,
+		mod_config.horse.spawn.chance,
+		mod_config.horse.spawn.active_object_count,
+		mod_config.horse.spawn.min_height,
+		mod_config.horse.spawn.max_height,
+		true
+	)
+end
 
 mobs:register_egg("mob_horse:horse", S("Horse"), "wool_brown.png", 1)
 
