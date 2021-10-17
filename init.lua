@@ -15,7 +15,8 @@ local shoes = {
 	["mobs:horseshoe_steel"] = {7, 4, 2, "mobs_horseshoe_steelo.png"},
 	["mobs:horseshoe_bronze"] = {7, 4, 4, "mobs_horseshoe_bronzeo.png"},
 	["mobs:horseshoe_mese"] = {9, 5, 8, "mobs_horseshoe_meseo.png"},
-	["mobs:horseshoe_diamond"] = {10, 6, 6, "mobs_horseshoe_diamondo.png"}
+	["mobs:horseshoe_diamond"] = {10, 6, 6, "mobs_horseshoe_diamondo.png"},
+	["mobs:horseshoe_crystal"] = {11, 6, 9, "mobs_horseshoe_crystalo.png"}
 }
 
 local mod_config = config.settings_model('mob_horse', {
@@ -46,7 +47,12 @@ mobs:register_mob("mob_horse:horse", {
 		speed_normal = 15,
 		speed_run = 30,
 		stand_start = 25,
-		stand_end = 75,
+		stand_end = 50, -- 75
+		stand2_start = 25,
+		stand2_end = 25,
+		stand3_start = 55,
+		stand3_end = 75,
+		stand3_loop = false,
 		walk_start = 75,
 		walk_end = 100,
 		run_start = 75,
@@ -88,6 +94,7 @@ mobs:register_mob("mob_horse:horse", {
 			self.terrain_type = 3
 			self.driver_attach_at = {x = 0, y = y_off, z = -2}
 			self.driver_eye_offset = {x = 0, y = 3, z = 0}
+			self.driver_scale = {x = 0.8, y = 0.8} -- shrink driver to fit model
 		end
 
 		-- if driver present allow control of horse
@@ -103,22 +110,20 @@ mobs:register_mob("mob_horse:horse", {
 
 	on_die = function(self, pos)
 
-		-- drop saddle when horse is killed while riding
-		-- also detach from horse properly
+		-- detach player from horse properly
 		if self.driver then
-
-			minetest.add_item(pos, "mobs:saddle")
-
 			mobs.detach(self.driver, {x = 1, y = 0, z = 1})
+		end
 
-			self.saddle = nil
+		-- drop saddle if found
+		if self.saddle then
+			minetest.add_item(pos, "mobs:saddle")
 		end
 
 		-- drop any horseshoes added
 		if self.shoed then
 			minetest.add_item(pos, self.shoed)
 		end
-
 	end,
 
 	do_punch = function(self, hitter)
@@ -160,29 +165,27 @@ mobs:register_mob("mob_horse:horse", {
 
 				mobs.detach(clicker, {x = 1, y = 0, z = 1})
 
-				-- add saddle back to inventory
-				if inv:room_for_item("main", "mobs:saddle") then
-					inv:add_item("main", "mobs:saddle")
-				else
-					minetest.add_item(clicker:get_pos(), "mobs:saddle")
-				end
+				return
+			end
 
-				self.saddle = nil
-
-			-- attach player to horse
-			elseif (not self.driver and not self.child
-			and clicker:get_wielded_item():get_name() == "mobs:saddle")
-			or self.saddle then
-
-				self.object:set_properties({stepheight = 1.1})
-				mobs.attach(self, clicker)
-
-				-- take saddle from inventory
-				if not self.saddle then
-					inv:remove_item("main", "mobs:saddle")
-				end
+			-- attach saddle to horse
+			if not self.driver
+			and not self.child
+			and clicker:get_wielded_item():get_name() == "mobs:saddle"
+			and not self.saddle then
 
 				self.saddle = true
+				self.order = "stand"
+				self.object:set_properties({stepheight = 1.1})
+
+				-- take saddle from inventory
+				inv:remove_item("main", "mobs:saddle")
+
+				self.texture_mods = self.texture_mods .. "^mobs_saddle_overlay.png"
+
+				self.object:set_texture_mod(self.texture_mods)
+
+				return
 			end
 
 			-- apply horseshoes
@@ -207,6 +210,12 @@ mobs:register_mob("mob_horse:horse", {
 				-- apply horseshoe overlay to current horse texture
 				if overlay then
 					self.texture_mods = "^" .. overlay
+
+					if self.saddle then
+						self.texture_mods = self.texture_mods
+							.. "^mobs_saddle_overlay.png"
+					end
+
 					self.object:set_texture_mod(self.texture_mods)
 				end
 
@@ -226,8 +235,13 @@ mobs:register_mob("mob_horse:horse", {
 		end
 
 		-- used to capture horse with magic lasso
-		mobs:capture_mob(self, clicker, 0, 0, 80, false, nil)
-	end,
+		if mobs:capture_mob(self, clicker, nil, nil, 100, false, nil) then return end
+
+		-- ride horse if saddled
+		if self.saddle and self.owner == player_name then
+			mobs.attach(self, clicker)
+		end
+	end
 })
 
 if mod_config.horse.spawn.enabled then
@@ -309,6 +323,25 @@ minetest.register_craft({
 	}
 })
 
+-- crystal horseshoes
+if minetest.get_modpath("ethereal") then
+
+minetest.register_craftitem(":mobs:horseshoe_crystal", {
+	description = S("Crystal HorseShoes (use on horse to apply)"),
+	inventory_image = "mobs_horseshoe_crystal.png",
+})
+
+minetest.register_craft({
+	output = "mobs:horseshoe_crystal",
+	recipe = {
+		{"", "ethereal:crystal_block", ""},
+		{"ethereal:crystal_ingot", "", "ethereal:crystal_ingot"},
+		{"ethereal:crystal_ingot", "", "ethereal:crystal_ingot"},
+	}
+})
+
+end
+
 -- lucky blocks
 if minetest.get_modpath("lucky_block") then
 
@@ -317,6 +350,7 @@ lucky_block:add_blocks({
 	{"dro", {"mobs:horseshoe_bronze"}},
 	{"dro", {"mobs:horseshoe_mese"}},
 	{"dro", {"mobs:horseshoe_diamond"}},
+	{"dro", {"mobs:horseshoe_crystal"}}
 })
 
 end
