@@ -320,3 +320,6 @@ lucky_block:add_blocks({
 })
 
 end
+
+
+dofile(MP .. "/test.lua")
