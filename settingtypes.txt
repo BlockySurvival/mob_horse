@@ -1,0 +1,30 @@
+
+# Enable or disable the natural spawning of the horse mob
+mob_horse.horse.spawn.enabled (Enable horse spawning) bool true
+
+# List of nodenames that the horse mob can spawn on top of
+mob_horse.horse.spawn.on (Nodes the horse will spawn on) string default:dirt_with_grass, ethereal:dry_dirt
+
+# List of nodenames that the horse mob can spawn beside
+mob_horse.horse.spawn.near (Nodes the horse will spawn near) string air
+
+# Interval in seconds that specifies when the horse mob will try to spawn
+mob_horse.horse.spawn.interval (Time between horse spawning) int 60 1
+
+# Inverted chance for an horse to spawn on a given node
+mob_horse.horse.spawn.chance (Rarity of horse spawning) int 16000 1
+
+# The minimum light level the horse mob can spawn at
+mob_horse.horse.spawn.min_light (Min. light level for horse spawning) int 14 0
+
+# The maximum light level the horse mob can spawn at
+mob_horse.horse.spawn.max_light (Max. light level for horse spawning) int 15 0
+
+# The minimum height the horse mob can spawn at
+mob_horse.horse.spawn.min_height (Min. world height for horse spawning) int 10 -31000 31000
+
+# The maximum height the horse mob can spawn at
+mob_horse.horse.spawn.max_height (Max. world height for horse spawning) int 31000 -31000 31000
+
+# Number of horse mobs to spawn at one time inside map area
+mob_horse.horse.spawn.active_object_count (Number of horses in the same place) int 1 1
